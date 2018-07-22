@@ -68,7 +68,9 @@ class WPM_Taxonomies extends WPM_Object {
 	public function translate_terms( $terms ) {
 		foreach ( $terms as &$term ) {
 			if ( is_object( $term ) ) {
-				$term = wpm_translate_term( $term, $term->taxonomy );
+				if ($term->taxonomy !== 'post_tag') {
+					$term = wpm_translate_term( $term, $term->taxonomy );
+				}
 			} else {
 				$term = wpm_translate_value( $term );
 			}
