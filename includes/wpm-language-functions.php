@@ -107,16 +107,13 @@ function wpm_get_available_translations() {
  * @return string
  */
 function wpm_get_language() {
-
-	$referrer = wp_get_raw_referer();
-
-	if ( ( defined( 'REST_REQUEST' ) && ( 'GET' !== $_SERVER['REQUEST_METHOD'] || is_admin_url( $referrer ) ) ) || is_admin() ) {
+	if ( ( defined( 'REST_REQUEST' ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) || is_admin() ) {
 
 		$languages = wpm_get_languages();
 		$query     = $_GET;
 
 		if ( wp_doing_ajax() ) {
-			if ( $referrer && ! is_front_ajax() ) {
+			if ( ! is_front_ajax() && ( $referrer = wp_get_raw_referer() ) ) {
 				$query = wp_parse_url( $referrer, PHP_URL_QUERY );
 			} else {
 				return wpm_get_user_language();
@@ -133,7 +130,6 @@ function wpm_get_language() {
 				$lang = wpm_get_user_language();
 			}
 		}
-
 	} else {
 		$lang = wpm_get_user_language();
 	}

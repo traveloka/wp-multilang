@@ -41,6 +41,7 @@ class WPM_Taxonomies extends WPM_Object {
 	 */
 	public function __construct() {
 		add_filter( 'get_term', 'wpm_translate_term', 5, 2 );
+		//commented to fix the tags issue
 		add_filter( 'get_terms', array( $this, 'translate_terms' ), 5 );
 		add_filter( 'term_name', 'wpm_translate_string', 5 );
 		add_filter( 'term_description', 'wpm_translate_value', 5 );
@@ -68,7 +69,10 @@ class WPM_Taxonomies extends WPM_Object {
 	public function translate_terms( $terms ) {
 		foreach ( $terms as &$term ) {
 			if ( is_object( $term ) ) {
-				$term = wpm_translate_term( $term, $term->taxonomy );
+				if ($term->taxonomy !== 'post_tag') {
+					$term = wpm_translate_term( $term, $term->taxonomy );
+				}
+
 			} else {
 				$term = wpm_translate_value( $term );
 			}
@@ -157,7 +161,7 @@ class WPM_Taxonomies extends WPM_Object {
 
 		foreach ( $results as $result ) {
 			$ml_term = wpm_translate_string( $result->name );
-			if ( ( $ml_term === $name || $result->slug === $slug ) && ! is_taxonomy_hierarchical( $taxonomy ) ) {
+			if ( ( $ml_term === $name || $result->slug == $slug) && ! is_taxonomy_hierarchical( $taxonomy ) ) {
 				return new \WP_Error( 'term_exists', __( 'A term with the name provided already exists in this taxonomy.' ), $result->term_id );
 			}
 		}
@@ -182,6 +186,7 @@ class WPM_Taxonomies extends WPM_Object {
 		if ( null === $taxonomy_config ) {
 			return $data;
 		}
+
 
 		if ( ! wpm_is_ml_value( $data['name'] ) ) {
 			$data['name'] = wpm_set_new_value( array(), $data['name'], $taxonomy_config['name'] );

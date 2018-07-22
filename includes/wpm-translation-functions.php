@@ -40,7 +40,7 @@ function wpm_translate_url( $url, $language = '' ) {
 		$language = $user_language;
 	}
 
-	if ( is_admin_url( $url ) || preg_match( '/^.*\.php$/i', wp_parse_url( $url, PHP_URL_PATH ) ) ) {
+	if ( ( strpos( $url, 'wp-admin/' ) !== false ) || preg_match( '/^.*\.php$/i', wp_parse_url( $url, PHP_URL_PATH ) ) ) {
 		return add_query_arg( 'lang', $language, $url );
 	}
 
@@ -98,6 +98,7 @@ function wpm_translate_string( $string, $language = '' ) {
 	if ( ! wpm_is_ml_array( $strings ) ) {
 		return $strings;
 	}
+
 
 	$languages = wpm_get_languages();
 
@@ -367,35 +368,36 @@ function wpm_set_language_value( $localize_array, $value, $config = array(), $la
  */
 function wpm_translate_object( $object, $lang = '' ) {
 
-	foreach ( get_object_vars( $object ) as $key => $content ) {
+	$translatedObject = $object;
+	foreach ( get_object_vars( $translatedObject ) as $key => $content ) {
 		switch ( $key ) {
 			case 'attr_title':
 			case 'post_title':
 			case 'name':
 			case 'title':
-				$object->$key = wpm_translate_string( $content, $lang );
+				$translatedObject->$key = wpm_translate_string( $content, $lang );
 				break;
 			case 'post_excerpt':
 			case 'description':
 			case 'post_content':
 				if ( is_serialized_string( $content ) ) {
-					$object->$key = serialize( wpm_translate_value( unserialize( $content ), $lang ) );
+					$translatedObject->$key = serialize( wpm_translate_value( unserialize( $content ), $lang ) );
 					break;
 				}
 
 				if ( isJSON( $content ) ) {
-					$object->$key = wp_json_encode( wpm_translate_value( json_decode( $content, true ), $lang ) );
+					$translatedObject->$key = wp_json_encode( wpm_translate_value( json_decode( $content, true ), $lang ) );
 					break;
 				}
 
 				if ( wpm_is_ml_string( $content ) ) {
-					$object->$key = wpm_translate_string( $content, $lang );
+					$translatedObject->$key = wpm_translate_string( $content, $lang );
 					break;
 				}
 		}
 	}
 
-	return $object;
+	return $translatedObject;
 }
 
 
